@@ -131,7 +131,6 @@
 </div>
 
 <script>
-    // MASUKKAN URL BARU DARI HASIL DEPLOY GOOGLE APPS SCRIPT DI SINI
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygJevxU9KeE-kYHIk_FByDlgBeIk-UcETC68kydXyNzdFmG4RK7ka-CU6PnPn_NPuXZA/exec"; 
     
     function updateDivisi() {
@@ -145,13 +144,11 @@
     let currentLat="", currentLon="", currentLokasi="Mencari alamat...", fotoBase64="", isFront=true, streamObj=null;
 
 async function aktifkanKamera() {
-    // TAMBAHKAN CODE BARU DI BAWAH INI
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Browser/Aplikasi ini tidak mendukung akses kamera secara langsung.");
+        alert("Browser/Aplikasi ini tidak mendukung akses kamera.");
         return;
     }
 
-    // Minta izin lokasi secara eksplisit dulu
     navigator.geolocation.getCurrentPosition(async pos => {
         currentLat = pos.coords.latitude.toFixed(7);
         currentLon = pos.coords.longitude.toFixed(7);
@@ -166,18 +163,10 @@ async function aktifkanKamera() {
         } catch (e) { 
             document.getElementById("wm-address").innerText = "📍 Gagal memuat alamat"; 
         }
-
-        // Setelah lokasi OK, panggil kamera
         startStream();
     }, (err) => {
-        // Jika lokasi gagal (biasanya karena belum dicentang di WebIntoApp)
-        console.error(err);
-        alert("Gagal akses lokasi: " + err.message + ". Pastikan GPS aktif dan izin aplikasi diberikan.");
-    }, { 
-        enableHighAccuracy: true,
-        timeout: 10000, // Tunggu maksimal 10 detik
-        maximumAge: 0 
-    });
+        alert("Gagal akses lokasi: " + err.message);
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 }
 
     async function startStream() {
@@ -255,7 +244,8 @@ async function aktifkanKamera() {
                 method: "POST",
                 body: JSON.stringify(payload)
             });
-            alert("✅ Absensi PIPD Berhasil!");
+            // TEKS SUDAH DIUBAH DI SINI
+            alert("Absensi Berhasil Dikirim, Terima Kasih Geyyzzz");
             location.reload();
         } catch (err) {
             alert("❌ Gagal mengirim. Coba lagi.");
