@@ -144,22 +144,41 @@
     const video = document.getElementById("video"), photoPreview = document.getElementById("photo-preview"), wmOverlay = document.getElementById("wm-overlay");
     let currentLat="", currentLon="", currentLokasi="Mencari alamat...", fotoBase64="", isFront=true, streamObj=null;
 
-    async function aktifkanKamera() {
-        navigator.geolocation.getCurrentPosition(async pos => {
-            currentLat = pos.coords.latitude.toFixed(7);
-            currentLon = pos.coords.longitude.toFixed(7);
-            document.getElementById("wm-coords").innerText = `Lat: ${currentLat} Lon: ${currentLon}`;
-            document.getElementById("wm-time").innerText = new Date().toLocaleString("id-ID");
-            
-            try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLon}`);
-                const d = await r.json();
-                currentLokasi = d.display_name.split(',').slice(0, 4).join(',');
-                document.getElementById("wm-address").innerText = "📍 " + currentLokasi;
-            } catch (e) { document.getElementById("wm-address").innerText = "📍 Gagal memuat alamat"; }
-            startStream();
-        }, () => alert("Mohon izinkan akses lokasi!"), { enableHighAccuracy: true });
+async function aktifkanKamera() {
+    // TAMBAHKAN CODE BARU DI BAWAH INI
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Browser/Aplikasi ini tidak mendukung akses kamera secara langsung.");
+        return;
     }
+
+    // Minta izin lokasi secara eksplisit dulu
+    navigator.geolocation.getCurrentPosition(async pos => {
+        currentLat = pos.coords.latitude.toFixed(7);
+        currentLon = pos.coords.longitude.toFixed(7);
+        document.getElementById("wm-coords").innerText = `Lat: ${currentLat} Lon: ${currentLon}`;
+        document.getElementById("wm-time").innerText = new Date().toLocaleString("id-ID");
+        
+        try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLon}`);
+            const d = await r.json();
+            currentLokasi = d.display_name.split(',').slice(0, 4).join(',');
+            document.getElementById("wm-address").innerText = "📍 " + currentLokasi;
+        } catch (e) { 
+            document.getElementById("wm-address").innerText = "📍 Gagal memuat alamat"; 
+        }
+
+        // Setelah lokasi OK, panggil kamera
+        startStream();
+    }, (err) => {
+        // Jika lokasi gagal (biasanya karena belum dicentang di WebIntoApp)
+        console.error(err);
+        alert("Gagal akses lokasi: " + err.message + ". Pastikan GPS aktif dan izin aplikasi diberikan.");
+    }, { 
+        enableHighAccuracy: true,
+        timeout: 10000, // Tunggu maksimal 10 detik
+        maximumAge: 0 
+    });
+}
 
     async function startStream() {
         if (streamObj) streamObj.getTracks().forEach(t => t.stop());
